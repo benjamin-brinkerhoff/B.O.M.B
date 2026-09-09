@@ -42,5 +42,5 @@ class ChapterReference {
     this.verse,
   });
 
-  String get displayReference => '\$bookId \$chapter\${verse != null ? ':\$verse' : ''}';
+  String get displayReference => '$bookId $chapter${verse != null ? ':$verse' : ''}';
 }

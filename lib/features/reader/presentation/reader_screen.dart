@@ -33,13 +33,13 @@ class ReaderScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '\${currentBook.title} \$currentChapter',
+                      '${currentBook.title} $currentChapter',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     Text(
                       state.currentVolumeId == 'bom'
                           ? 'The Book of Mormon'
-                          : '\${currentVolume.shortTitle} (\${state.currentBibleVersion.abbreviation})',
+                          : '${currentVolume.shortTitle} (${state.currentBibleVersion.abbreviation})',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -90,7 +90,7 @@ class ReaderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'CHAPTER \$currentChapter',
+                    'CHAPTER $currentChapter',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -131,7 +131,7 @@ class ReaderScreen extends StatelessWidget {
                 onPressed: () => state.previousChapter(),
               ),
               Text(
-                'Chapter \$currentChapter of \${currentBook.chapterCount}',
+                'Chapter $currentChapter of ${currentBook.chapterCount}',
                 style: theme.textTheme.bodySmall,
               ),
               OutlinedButton.icon(
@@ -194,7 +194,7 @@ class _VerseRow extends StatelessWidget {
                 SizedBox(
                   width: 34,
                   child: Text(
-                    '\${verse.verseNumber}',
+                    '${verse.verseNumber}',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -241,7 +241,7 @@ class _VerseRow extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '#\$tag',
+                        '#$tag',
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                       ),
                     );

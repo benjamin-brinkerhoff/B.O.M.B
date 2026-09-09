@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/data/scripture_canon.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
+import '../../../core/state/app_state.dart';
 
 /// Interactive 3-stage modal navigation:
 /// 1. Volume selection (Book of Mormon, Old Testament, New Testament) + Bible Translation
@@ -83,7 +84,7 @@ class _ScripturePickerDialogState extends State<ScripturePickerDialog> {
                     child: Text(
                       _currentStep == 0
                           ? 'Select Book'
-                          : '\${_selectedBook?.title ?? ''} — Select Chapter',
+                          : '${_selectedBook?.title ?? ''} — Select Chapter',
                       style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -127,7 +128,7 @@ class _ScripturePickerDialogState extends State<ScripturePickerDialog> {
                       const Icon(Icons.translate, size: 16),
                       const SizedBox(width: 8),
                       Text(
-                        'Translation: \${state.currentBibleVersion.name} (\${state.currentBibleVersion.abbreviation})',
+                        'Translation: ${state.currentBibleVersion.name} (${state.currentBibleVersion.abbreviation})',
                         style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const Spacer(),
@@ -167,7 +168,7 @@ class _ScripturePickerDialogState extends State<ScripturePickerDialog> {
           margin: const EdgeInsets.symmetric(vertical: 4.0),
           child: ListTile(
             title: Text(book.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text('\${book.chapterCount} \${book.chapterCount == 1 ? 'Chapter' : 'Chapters'}'),
+            subtitle: Text('${book.chapterCount} ${book.chapterCount == 1 ? 'Chapter' : 'Chapters'}'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               setState(() {
@@ -223,7 +224,7 @@ class _ScripturePickerDialogState extends State<ScripturePickerDialog> {
               ),
             ),
             child: Text(
-              '\$chapterNum',
+              '$chapterNum',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isCurrent ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
@@ -247,7 +248,7 @@ class _ScripturePickerDialogState extends State<ScripturePickerDialog> {
             final isSelected = ver.id == state.currentBibleVersionId;
             return ListTile(
               leading: Icon(isSelected ? Icons.check_circle : Icons.radio_button_unchecked),
-              title: Text('\${ver.name} (\${ver.abbreviation})'),
+              title: Text('${ver.name} (${ver.abbreviation})'),
               subtitle: Text(ver.description),
               onTap: () {
                 state.setBibleVersion(ver.id);

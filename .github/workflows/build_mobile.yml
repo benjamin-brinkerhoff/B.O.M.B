@@ -93,6 +93,11 @@ jobs:
             echo "Generating iOS platform runner..."
             flutter create --platforms=ios --org com.bomb.study .
           fi
+          # Set dummy DEVELOPMENT_TEAM in project.pbxproj so Flutter CLI checks pass without provisioning
+          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "0000000000";/g' ios/Runner.xcodeproj/project.pbxproj 2>/dev/null || true
+          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Release.xcconfig
+          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
+          echo "CODE_SIGN_IDENTITY=" >> ios/Flutter/Release.xcconfig
 
       - name: Install dependencies & CocoaPods
         run: |
@@ -102,22 +107,12 @@ jobs:
           cd ..
 
       - name: Build Unsigned iOS Application
-        run: flutter build ios --release --no-codesign --simulator
+        run: flutter build ios --release --no-codesign
 
       - name: Package Unsigned iOS IPA
         run: |
           mkdir -p dist
-          APP_DIR=""
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then
-            APP_DIR="build/ios/iphoneos"
-          elif [ -d "build/ios/iphonesimulator/Runner.app" ]; then
-            APP_DIR="build/ios/iphonesimulator"
-          else
-            echo "Searching for Runner.app..."
-            APP_DIR=$(dirname $(find build/ios -name "Runner.app" | head -n 1))
-          fi
-          echo "Packaging Runner.app from $APP_DIR"
-          cd "$APP_DIR"
+          cd build/ios/iphoneos
           mkdir -p Payload
           cp -r Runner.app Payload/
           zip -r -q ../../../dist/B.O.M.B-unsigned.ipa Payload

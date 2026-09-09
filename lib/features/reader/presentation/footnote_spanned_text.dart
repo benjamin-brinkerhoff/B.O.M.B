@@ -66,7 +66,7 @@ class FootnoteSpannedText extends StatelessWidget {
         // Add subtle footnote key superscript
         spans.add(
           TextSpan(
-            text: '\${matchedFootnote.footnoteKey} ',
+            text: '${matchedFootnote.footnoteKey} ',
             style: baseStyle.copyWith(
               fontSize: (baseStyle.fontSize ?? 16) * 0.72,
               color: const Color(0xFF1565C0),
@@ -75,7 +75,7 @@ class FootnoteSpannedText extends StatelessWidget {
           ),
         );
       } else {
-        spans.add(TextSpan(text: '\$rawWord ', style: baseStyle));
+        spans.add(TextSpan(text: '$rawWord ', style: baseStyle));
       }
     }
 

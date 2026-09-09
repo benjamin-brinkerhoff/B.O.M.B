@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_state.dart';
+export 'app_state.dart';
 
 /// InheritedWidget providing AppState down the widget hierarchy.
 class AppScope extends InheritedNotifier<AppState> {

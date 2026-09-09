@@ -70,7 +70,7 @@ class FootnotePopupSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  '"\${footnote.word}"',
+                  '"${footnote.word}"',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

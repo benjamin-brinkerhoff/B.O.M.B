@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
+import '../../../core/state/app_state.dart';
 
 /// Global scripture, tag, and personal note search engine.
 class SearchScreen extends StatefulWidget {
@@ -255,7 +256,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         color: Colors.teal.shade100,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text('#\${res.matchedTag}', style: const TextStyle(fontSize: 11, color: Colors.teal, fontWeight: FontWeight.bold)),
+                      child: Text('#${res.matchedTag}', style: const TextStyle(fontSize: 11, color: Colors.teal, fontWeight: FontWeight.bold)),
                     )
                   else if (res.isNoteMatch)
                     Container(
@@ -284,7 +285,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'Note: \${res.matchedNote}',
+                    'Note: ${res.matchedNote}',
                     style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 13),
                   ),
                 ),

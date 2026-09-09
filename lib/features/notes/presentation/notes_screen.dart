@@ -44,9 +44,9 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Notes (\${notes.length})', icon: const Icon(Icons.note_alt_outlined)),
-            Tab(text: 'Highlights (\${highlights.length})', icon: const Icon(Icons.format_color_highlight)),
-            Tab(text: 'Tags (\${tags.length})', icon: const Icon(Icons.label_outline)),
+            Tab(text: 'Notes (${notes.length})', icon: const Icon(Icons.note_alt_outlined)),
+            Tab(text: 'Highlights (${highlights.length})', icon: const Icon(Icons.highlight)),
+            Tab(text: 'Tags (${tags.length})', icon: const Icon(Icons.label_outline)),
           ],
         ),
       ),
@@ -101,7 +101,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                               return Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: FilterChip(
-                                  label: Text('#\$t (\$count)'),
+                                  label: Text('#$t ($count)'),
                                   selected: isSel,
                                   onSelected: (_) => setState(() => _selectedFilterTag = isSel ? null : t),
                                 ),
@@ -164,7 +164,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
 
   Widget _buildNoteCard(VerseAnnotation ann, dynamic state, ThemeData theme) {
     final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
-    final ref = '\${book?.title ?? ann.bookId} \${ann.chapter}:\${ann.verseNumber}';
+    final ref = '${book?.title ?? ann.bookId} ${ann.chapter}:${ann.verseNumber}';
     final volume = ScriptureCanon.getVolume(ann.volumeId);
 
     return Card(
@@ -215,7 +215,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
 
   Widget _buildHighlightCard(VerseAnnotation ann, dynamic state, ThemeData theme) {
     final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
-    final ref = '\${book?.title ?? ann.bookId} \${ann.chapter}:\${ann.verseNumber}';
+    final ref = '${book?.title ?? ann.bookId} ${ann.chapter}:${ann.verseNumber}';
     final volume = ScriptureCanon.getVolume(ann.volumeId);
     final verses = ScriptureRepository.getChapterVerses(ann.volumeId, ann.bookId, ann.chapter);
     final verse = verses.firstWhere(
@@ -225,7 +225,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
         bookId: ann.bookId,
         chapter: ann.chapter,
         verseNumber: ann.verseNumber,
-        text: 'Verse \${ann.verseNumber}',
+        text: 'Verse ${ann.verseNumber}',
       ),
     );
 
@@ -281,7 +281,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
 
   Widget _buildTaggedVerseCard(VerseAnnotation ann, dynamic state, ThemeData theme) {
     final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
-    final ref = '\${book?.title ?? ann.bookId} \${ann.chapter}:\${ann.verseNumber}';
+    final ref = '${book?.title ?? ann.bookId} ${ann.chapter}:${ann.verseNumber}';
     final volume = ScriptureCanon.getVolume(ann.volumeId);
 
     return Card(
@@ -315,7 +315,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                 spacing: 6,
                 children: ann.tags.map((t) {
                   return Chip(
-                    label: Text('#\$t', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    label: Text('#$t', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                     backgroundColor: theme.colorScheme.primaryContainer.withOpacity(0.5),
                     visualDensity: VisualDensity.compact,
                   );
@@ -328,7 +328,7 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                     const Icon(Icons.link, size: 14, color: Colors.blue),
                     const SizedBox(width: 4),
                     Text(
-                      'Linked to: \${ann.linkedVerseKeys.length} \${ann.linkedVerseKeys.length == 1 ? 'verse' : 'verses'}',
+                      'Linked to: ${ann.linkedVerseKeys.length} ${ann.linkedVerseKeys.length == 1 ? 'verse' : 'verses'}',
                       style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w600),
                     ),
                   ],

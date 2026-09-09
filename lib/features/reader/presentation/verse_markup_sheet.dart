@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/data/scripture_canon.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
+import '../../../core/state/app_state.dart';
 import '../../study_tools/presentation/dictionary_lookup_sheet.dart';
 
 /// Bottom sheet for highlighting, personal notes, custom tagging,
@@ -112,7 +113,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final theme = Theme.of(context);
-    final reference = '\${widget.bookTitle} \${widget.verse.chapter}:\${widget.verse.verseNumber}';
+    final reference = '${widget.bookTitle} ${widget.verse.chapter}:${widget.verse.verseNumber}';
 
     return Padding(
       padding: EdgeInsets.only(
@@ -162,7 +163,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
                   icon: const Icon(Icons.copy, size: 20),
                   tooltip: 'Copy Verse',
                   onPressed: () {
-                    Clipboard.setData(ClipboardData(text: '\$reference - "\${widget.verse.text}"'));
+                    Clipboard.setData(ClipboardData(text: '$reference - "${widget.verse.text}"'));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Verse copied to clipboard')),
                     );
@@ -400,7 +401,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
     final parts = key.split(':');
     if (parts.length != 4) return key;
     final book = ScriptureCanon.getBook(parts[0], parts[1]);
-    return '\${book?.title ?? parts[1]} \${parts[2]}:\${parts[3]}';
+    return '${book?.title ?? parts[1]} ${parts[2]}:${parts[3]}';
   }
 
   void _showLinkScriptureDialog(BuildContext context, AppState state) {

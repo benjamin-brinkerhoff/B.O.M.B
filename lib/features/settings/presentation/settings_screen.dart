@@ -114,7 +114,7 @@ class SettingsScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Font Size', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('\${state.fontSize.round()} pt', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('${state.fontSize.round()} pt', style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           Slider(
@@ -122,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
             min: 13.0,
             max: 28.0,
             divisions: 15,
-            label: '\${state.fontSize.round()} pt',
+            label: '${state.fontSize.round()} pt',
             onChanged: (size) => state.setFontSize(size),
           ),
 
@@ -133,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           ...ScriptureCanon.bibleVersions.map((v) {
             return RadioListTile<String>(
-              title: Text('\${v.name} (\${v.abbreviation})'),
+              title: Text('${v.name} (${v.abbreviation})'),
               subtitle: Text(v.description),
               value: v.id,
               groupValue: state.currentBibleVersionId,
