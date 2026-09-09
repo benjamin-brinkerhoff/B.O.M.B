@@ -80,7 +80,7 @@ enum HighlightColor {
   const HighlightColor(this.hexValue, this.label, this.color);
 }
 
-/// Represents user markup (highlight, personal note) on a verse.
+/// Represents user markup (highlight, personal note, tags, personal cross-reference links) on a verse.
 class VerseAnnotation {
   final String id;
   final String volumeId;
@@ -89,6 +89,8 @@ class VerseAnnotation {
   final int verseNumber;
   final HighlightColor? highlightColor;
   final String? note;
+  final List<String> tags;
+  final List<String> linkedVerseKeys; // Format: "volumeId:bookId:chapter:verseNumber"
   final DateTime updatedAt;
 
   const VerseAnnotation({
@@ -99,6 +101,8 @@ class VerseAnnotation {
     required this.verseNumber,
     this.highlightColor,
     this.note,
+    this.tags = const [],
+    this.linkedVerseKeys = const [],
     required this.updatedAt,
   });
 
@@ -109,6 +113,8 @@ class VerseAnnotation {
     bool clearHighlight = false,
     String? note,
     bool clearNote = false,
+    List<String>? tags,
+    List<String>? linkedVerseKeys,
     DateTime? updatedAt,
   }) {
     return VerseAnnotation(
@@ -119,9 +125,74 @@ class VerseAnnotation {
       verseNumber: verseNumber,
       highlightColor: clearHighlight ? null : (highlightColor ?? this.highlightColor),
       note: clearNote ? null : (note ?? this.note),
+      tags: tags ?? this.tags,
+      linkedVerseKeys: linkedVerseKeys ?? this.linkedVerseKeys,
       updatedAt: updatedAt ?? DateTime.now(),
     );
   }
+}
+
+/// Individual cross-reference target inside a footnote.
+class FootnoteReference {
+  final String volumeId;
+  final String bookId;
+  final int chapter;
+  final int verseNumber;
+  final String displayReference; // e.g. "1 Sam. 3:19" or "Philip. 4:13"
+  final String? previewText;
+
+  const FootnoteReference({
+    required this.volumeId,
+    required this.bookId,
+    required this.chapter,
+    required this.verseNumber,
+    required this.displayReference,
+    this.previewText,
+  });
+}
+
+/// Official Church-style footnote cross-reference attached to a word in a verse.
+class ScriptureFootnote {
+  final String id;
+  final String volumeId;
+  final String bookId;
+  final int chapter;
+  final int verseNumber;
+  final String word; // Word or phrase in the verse that triggers the footnote
+  final String footnoteKey; // e.g. "1a", "7b"
+  final String? definition; // e.g. "HEB: upright, honorable"
+  final String? topicalGuideTopic; // e.g. "TG Family" or "TG Faith"
+  final List<FootnoteReference> references;
+
+  const ScriptureFootnote({
+    required this.id,
+    required this.volumeId,
+    required this.bookId,
+    required this.chapter,
+    required this.verseNumber,
+    required this.word,
+    required this.footnoteKey,
+    this.definition,
+    this.topicalGuideTopic,
+    required this.references,
+  });
+}
+
+/// Dictionary entry for on-device definition lookup.
+class DictionaryEntry {
+  final String word;
+  final String partOfSpeech;
+  final String definition;
+  final String? etymology;
+  final List<String> sampleOccurrences;
+
+  const DictionaryEntry({
+    required this.word,
+    required this.partOfSpeech,
+    required this.definition,
+    this.etymology,
+    this.sampleOccurrences = const [],
+  });
 }
 
 /// Result of a global search query.
@@ -132,7 +203,9 @@ class SearchResult {
   final int verseNumber;
   final String verseText;
   final String? matchedNote;
+  final String? matchedTag;
   final bool isNoteMatch;
+  final bool isTagMatch;
 
   const SearchResult({
     required this.volumeTitle,
@@ -141,7 +214,9 @@ class SearchResult {
     required this.verseNumber,
     required this.verseText,
     this.matchedNote,
+    this.matchedTag,
     this.isNoteMatch = false,
+    this.isTagMatch = false,
   });
 
   String get reference => '$bookTitle $chapter:$verseNumber';

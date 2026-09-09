@@ -4,7 +4,7 @@ import '../../../core/data/scripture_repository.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
 
-/// Screen listing all user highlights and personal study notes.
+/// Screen managing personal study notes, highlights, and tagged cross-references.
 class NotesScreen extends StatefulWidget {
   final VoidCallback onNavigateToReader;
 
@@ -16,11 +16,12 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  String? _selectedFilterTag;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -35,15 +36,17 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
     final theme = Theme.of(context);
     final notes = state.allNotes;
     final highlights = state.allHighlights;
+    final tags = state.allDistinctTags;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Notes & Highlights', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Notes, Highlights & Tags', style: TextStyle(fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Study Notes (\${notes.length})', icon: const Icon(Icons.note_alt_outlined)),
+            Tab(text: 'Notes (\${notes.length})', icon: const Icon(Icons.note_alt_outlined)),
             Tab(text: 'Highlights (\${highlights.length})', icon: const Icon(Icons.format_color_highlight)),
+            Tab(text: 'Tags (\${tags.length})', icon: const Icon(Icons.label_outline)),
           ],
         ),
       ),
@@ -72,6 +75,65 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                     final hl = highlights[index];
                     return _buildHighlightCard(hl, state, theme);
                   },
+                ),
+
+          // Tab 3: Tags & Cross-Reference Explorer
+          tags.isEmpty
+              ? _buildEmptyState('No tags assigned yet.', 'Tag scriptures with topics like Faith, Prayer, or Prophecy to link verses together.', theme)
+              : Column(
+                  children: [
+                    // Horizontal Tag Selector Chips
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            FilterChip(
+                              label: const Text('All Tags'),
+                              selected: _selectedFilterTag == null,
+                              onSelected: (_) => setState(() => _selectedFilterTag = null),
+                            ),
+                            const SizedBox(width: 8),
+                            ...tags.map((t) {
+                              final isSel = _selectedFilterTag == t;
+                              final count = state.getVersesForTag(t).length;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: FilterChip(
+                                  label: Text('#\$t (\$count)'),
+                                  selected: isSel,
+                                  onSelected: (_) => setState(() => _selectedFilterTag = isSel ? null : t),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Divider(height: 1),
+
+                    // Tagged Verses List
+                    Expanded(
+                      child: Builder(
+                        builder: (_) {
+                          final filteredVerses = _selectedFilterTag != null
+                              ? state.getVersesForTag(_selectedFilterTag!)
+                              : notes;
+
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: filteredVerses.length,
+                            itemBuilder: (context, index) {
+                              final ann = filteredVerses[index];
+                              return _buildTaggedVerseCard(ann, state, theme);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
         ],
       ),
@@ -144,23 +206,6 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                   style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
                 ),
               ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  label: const Text('Read Verse'),
-                  onPressed: () {
-                    state.jumpTo(
-                      volumeId: ann.volumeId,
-                      bookId: ann.bookId,
-                      chapter: ann.chapter,
-                      verse: ann.verseNumber,
-                    );
-                    widget.onNavigateToReader();
-                  },
-                ),
-              ),
             ],
           ),
         ),
@@ -227,6 +272,68 @@ class _NotesScreenState extends State<NotesScreen> with SingleTickerProviderStat
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaggedVerseCard(VerseAnnotation ann, dynamic state, ThemeData theme) {
+    final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
+    final ref = '\${book?.title ?? ann.bookId} \${ann.chapter}:\${ann.verseNumber}';
+    final volume = ScriptureCanon.getVolume(ann.volumeId);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          state.jumpTo(
+            volumeId: ann.volumeId,
+            bookId: ann.bookId,
+            chapter: ann.chapter,
+            verse: ann.verseNumber,
+          );
+          widget.onNavigateToReader();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(ref, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 16)),
+                  const Spacer(),
+                  Text(volume.shortTitle, style: theme.textTheme.bodySmall),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                children: ann.tags.map((t) {
+                  return Chip(
+                    label: Text('#\$t', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    backgroundColor: theme.colorScheme.primaryContainer.withOpacity(0.5),
+                    visualDensity: VisualDensity.compact,
+                  );
+                }).toList(),
+              ),
+              if (ann.linkedVerseKeys.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.link, size: 14, color: Colors.blue),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Linked to: \${ann.linkedVerseKeys.length} \${ann.linkedVerseKeys.length == 1 ? 'verse' : 'verses'}',
+                      style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

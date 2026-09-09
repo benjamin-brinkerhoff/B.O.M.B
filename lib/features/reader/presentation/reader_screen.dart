@@ -3,9 +3,10 @@ import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
 import '../../navigation/presentation/scripture_picker_dialog.dart';
 import 'verse_markup_sheet.dart';
+import 'footnote_spanned_text.dart';
 
-/// Full interactive scripture reader supporting highlighting, notes, dynamic typography,
-/// and instant hierarchical navigation.
+/// Full interactive scripture reader supporting Church-standard blue footnotes,
+/// multi-color highlighting, personal notes, tag badges, and quick 3-tier navigation.
 class ReaderScreen extends StatelessWidget {
   const ReaderScreen({super.key});
 
@@ -167,6 +168,8 @@ class _VerseRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasNote = annotation?.note != null && annotation!.note!.isNotEmpty;
+    final hasTags = annotation?.tags != null && annotation!.tags.isNotEmpty;
+    final hasLinks = annotation?.linkedVerseKeys != null && annotation!.linkedVerseKeys.isNotEmpty;
     final highlightColor = annotation?.highlightColor != null
         ? annotation!.highlightColor!.color.withOpacity(0.55)
         : null;
@@ -176,7 +179,7 @@ class _VerseRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4.0),
-        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
         decoration: BoxDecoration(
           color: highlightColor,
           borderRadius: BorderRadius.circular(6),
@@ -200,24 +203,53 @@ class _VerseRow extends StatelessWidget {
                   ),
                 ),
 
-                // Verse Text
+                // Verse Text with Church-standard Blue Clickable Footnotes
                 Expanded(
-                  child: Text(
-                    verse.text,
-                    style: readerStyle,
+                  child: FootnoteSpannedText(
+                    verse: verse,
+                    baseStyle: readerStyle,
                   ),
                 ),
 
                 // Note Indicator Icon
                 if (hasNote)
                   Padding(
-                    padding: const EdgeInsets.only(left: 6.0),
+                    padding: const EdgeInsets.only(left: 4.0),
                     child: Icon(Icons.note_alt, size: 18, color: theme.colorScheme.secondary),
+                  ),
+
+                // Personal Cross-Link Indicator Icon
+                if (hasLinks)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
+                    child: Icon(Icons.link, size: 18, color: Colors.blue.shade700),
                   ),
               ],
             ),
 
-            // Inline Note Snippet if note is present
+            // Inline Tags Bar
+            if (hasTags)
+              Padding(
+                padding: const EdgeInsets.only(left: 34.0, top: 4.0),
+                child: Wrap(
+                  spacing: 4,
+                  children: annotation!.tags.map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '#\$tag',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+            // Inline Note Preview Snippet
             if (hasNote)
               Padding(
                 padding: const EdgeInsets.only(left: 34.0, top: 6.0, bottom: 2.0),
@@ -228,17 +260,11 @@ class _VerseRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                     border: Border(left: BorderSide(color: theme.colorScheme.secondary, width: 3)),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          annotation!.note!,
-                          style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    annotation!.note!,
+                    style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),

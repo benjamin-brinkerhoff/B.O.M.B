@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/scripture_models.dart';
 import '../data/scripture_canon.dart';
 import '../data/scripture_repository.dart';
+import '../data/scripture_footnotes.dart';
+import '../data/scripture_dictionary.dart';
 
-/// Global application state managing navigation, reading styles, annotations, and search.
+/// Global application state managing navigation, reading styles, annotations,
+/// tags, cross-reference links, footnotes, and search.
 class AppState extends ChangeNotifier {
   // Navigation State
   String _currentVolumeId = 'bom';
@@ -16,11 +19,54 @@ class AppState extends ChangeNotifier {
 
   // Reading Styles & Display Preferences
   ThemeMode _themeMode = ThemeMode.system;
-  String _fontFamilyOption = 'serif'; // 'sansSerif' (Arial), 'serif' (Times New Roman), 'georgia'
+  String _fontFamilyOption = 'serif'; // 'sansSerif', 'serif', 'georgia'
   double _fontSize = 17.0;
 
   // Annotations (Key format: "volumeId:bookId:chapter:verseNumber")
   final Map<String, VerseAnnotation> _annotations = {};
+
+  // Default demo tags and links for immediate testing
+  AppState() {
+    _initSeedAnnotations();
+  }
+
+  void _initSeedAnnotations() {
+    // Tag 1 Nephi 3:7 with "Commandments" and "Faith"
+    const key1 = 'bom:1-ne:3:7';
+    _annotations[key1] = VerseAnnotation(
+      id: key1,
+      volumeId: 'bom', bookId: '1-ne', chapter: 3, verseNumber: 7,
+      highlightColor: HighlightColor.yellow,
+      note: 'I will go and do — Nephi demonstrates unquestioning faith and trust in the Lord.',
+      tags: ['Commandments', 'Faith', 'Obedience'],
+      linkedVerseKeys: ['nt:phil:4:13', 'ot:prov:3:6'],
+      updatedAt: DateTime.now(),
+    );
+
+    // Tag Alma 32:21 with "Faith" and link to 1 Nephi 3:7
+    const key2 = 'bom:alma:32:21';
+    _annotations[key2] = VerseAnnotation(
+      id: key2,
+      volumeId: 'bom', bookId: 'alma', chapter: 32, verseNumber: 21,
+      highlightColor: HighlightColor.blue,
+      note: 'Faith is not a perfect knowledge, but a hope in unseen truth.',
+      tags: ['Faith', 'Hope'],
+      linkedVerseKeys: ['bom:1-ne:3:7'],
+      updatedAt: DateTime.now(),
+    );
+
+    // Tag James 1:5 with "Prayer" and "Wisdom"
+    const key3 = 'nt:james:1:5';
+    _annotations[key3] = VerseAnnotation(
+      id: key3,
+      volumeId: 'nt', bookId: 'james', chapter: 1, verseNumber: 5,
+      highlightColor: HighlightColor.green,
+      note: 'Ask of God in faith without wavering. The catalyst for the First Vision.',
+      tags: ['Prayer', 'Wisdom', 'Revelation'],
+      linkedVerseKeys: ['bom:1-ne:3:7'],
+      updatedAt: DateTime.now(),
+    );
+  }
 
   // Getters
   String get currentVolumeId => _currentVolumeId;
@@ -55,6 +101,22 @@ class AppState extends ChangeNotifier {
       .toList()
     ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
 
+  List<String> get allDistinctTags {
+    final tagsSet = <String>{};
+    for (final ann in _annotations.values) {
+      tagsSet.addAll(ann.tags);
+    }
+    final list = tagsSet.toList()..sort();
+    return list;
+  }
+
+  List<VerseAnnotation> getVersesForTag(String tag) {
+    return _annotations.values
+        .where((a) => a.tags.contains(tag))
+        .toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  }
+
   // Navigation Methods
   void jumpTo({
     required String volumeId,
@@ -76,7 +138,6 @@ class AppState extends ChangeNotifier {
       _targetVerse = null;
       notifyListeners();
     } else {
-      // Move to next book in volume if available
       final books = currentVolume.books;
       final bookIndex = books.indexWhere((b) => b.id == _currentBookId);
       if (bookIndex >= 0 && bookIndex < books.length - 1) {
@@ -94,7 +155,6 @@ class AppState extends ChangeNotifier {
       _targetVerse = null;
       notifyListeners();
     } else {
-      // Move to previous book in volume if available
       final books = currentVolume.books;
       final bookIndex = books.indexWhere((b) => b.id == _currentBookId);
       if (bookIndex > 0) {
@@ -147,82 +207,111 @@ class AppState extends ChangeNotifier {
     final theme = Theme.of(context);
     return TextStyle(
       fontSize: _fontSize,
-      height: 1.65,
+      height: 1.68,
       fontWeight: weight ?? FontWeight.normal,
       fontFamilyFallback: familyFallback,
       color: color ?? theme.textTheme.bodyLarge?.color,
     );
   }
 
-  // Annotation & Markup Methods
+  // Annotation Methods
   VerseAnnotation? getAnnotation(String volumeId, String bookId, int chapter, int verseNumber) {
     final key = '$volumeId:$bookId:$chapter:$verseNumber';
     return _annotations[key];
   }
 
+  VerseAnnotation _getOrCreateAnnotation(String volumeId, String bookId, int chapter, int verseNumber) {
+    final key = '$volumeId:$bookId:$chapter:$verseNumber';
+    if (!_annotations.containsKey(key)) {
+      _annotations[key] = VerseAnnotation(
+        id: key,
+        volumeId: volumeId,
+        bookId: bookId,
+        chapter: chapter,
+        verseNumber: verseNumber,
+        updatedAt: DateTime.now(),
+      );
+    }
+    return _annotations[key]!;
+  }
+
   void setHighlight(String volumeId, String bookId, int chapter, int verseNumber, HighlightColor? color) {
     final key = '$volumeId:$bookId:$chapter:$verseNumber';
-    final existing = _annotations[key];
-
-    if (existing == null) {
-      if (color != null) {
-        _annotations[key] = VerseAnnotation(
-          id: key,
-          volumeId: volumeId,
-          bookId: bookId,
-          chapter: chapter,
-          verseNumber: verseNumber,
-          highlightColor: color,
-          updatedAt: DateTime.now(),
-        );
-      }
-    } else {
-      if (color == null && (existing.note == null || existing.note!.isEmpty)) {
-        _annotations.remove(key);
-      } else {
-        _annotations[key] = existing.copyWith(
-          highlightColor: color,
-          clearHighlight: color == null,
-        );
-      }
-    }
+    final existing = _getOrCreateAnnotation(volumeId, bookId, chapter, verseNumber);
+    _annotations[key] = existing.copyWith(
+      highlightColor: color,
+      clearHighlight: color == null,
+    );
     notifyListeners();
   }
 
   void setNote(String volumeId, String bookId, int chapter, int verseNumber, String? noteText) {
     final key = '$volumeId:$bookId:$chapter:$verseNumber';
-    final existing = _annotations[key];
+    final existing = _getOrCreateAnnotation(volumeId, bookId, chapter, verseNumber);
     final trimmed = noteText?.trim();
-
-    if (existing == null) {
-      if (trimmed != null && trimmed.isNotEmpty) {
-        _annotations[key] = VerseAnnotation(
-          id: key,
-          volumeId: volumeId,
-          bookId: bookId,
-          chapter: chapter,
-          verseNumber: verseNumber,
-          note: trimmed,
-          updatedAt: DateTime.now(),
-        );
-      }
-    } else {
-      if ((trimmed == null || trimmed.isEmpty) && existing.highlightColor == null) {
-        _annotations.remove(key);
-      } else {
-        _annotations[key] = existing.copyWith(
-          note: trimmed,
-          clearNote: trimmed == null || trimmed.isEmpty,
-        );
-      }
-    }
+    _annotations[key] = existing.copyWith(
+      note: trimmed,
+      clearNote: trimmed == null || trimmed.isEmpty,
+    );
     notifyListeners();
   }
 
-  void deleteAnnotation(String volumeId, String bookId, int chapter, int verseNumber) {
+  void addTag(String volumeId, String bookId, int chapter, int verseNumber, String tag) {
+    final cleanTag = tag.trim();
+    if (cleanTag.isEmpty) return;
     final key = '$volumeId:$bookId:$chapter:$verseNumber';
-    _annotations.remove(key);
-    notifyListeners();
+    final existing = _getOrCreateAnnotation(volumeId, bookId, chapter, verseNumber);
+    if (!existing.tags.contains(cleanTag)) {
+      final updatedTags = List<String>.from(existing.tags)..add(cleanTag);
+      _annotations[key] = existing.copyWith(tags: updatedTags);
+      notifyListeners();
+    }
+  }
+
+  void removeTag(String volumeId, String bookId, int chapter, int verseNumber, String tag) {
+    final key = '$volumeId:$bookId:$chapter:$verseNumber';
+    final existing = _annotations[key];
+    if (existing != null && existing.tags.contains(tag)) {
+      final updatedTags = List<String>.from(existing.tags)..remove(tag);
+      _annotations[key] = existing.copyWith(tags: updatedTags);
+      notifyListeners();
+    }
+  }
+
+  void linkVerses(String sourceKey, String targetKey) {
+    if (sourceKey == targetKey) return;
+    final parts = sourceKey.split(':');
+    if (parts.length != 4) return;
+    final existing = _getOrCreateAnnotation(parts[0], parts[1], int.parse(parts[2]), int.parse(parts[3]));
+
+    if (!existing.linkedVerseKeys.contains(targetKey)) {
+      final updated = List<String>.from(existing.linkedVerseKeys)..add(targetKey);
+      _annotations[sourceKey] = existing.copyWith(linkedVerseKeys: updated);
+      notifyListeners();
+    }
+  }
+
+  void unlinkVerse(String sourceKey, String targetKey) {
+    final existing = _annotations[sourceKey];
+    if (existing != null && existing.linkedVerseKeys.contains(targetKey)) {
+      final updated = List<String>.from(existing.linkedVerseKeys)..remove(targetKey);
+      _annotations[sourceKey] = existing.copyWith(linkedVerseKeys: updated);
+      notifyListeners();
+    }
+  }
+
+  // Official Church-Style Footnotes
+  List<ScriptureFootnote> getFootnotes(String volumeId, String bookId, int chapter, int verseNumber) {
+    return ScriptureFootnotes.getFootnotesForVerse(volumeId, bookId, chapter, verseNumber);
+  }
+
+  ScriptureFootnote? findFootnoteByWord(String volumeId, String bookId, int chapter, int verseNumber, String word) {
+    return ScriptureFootnotes.findFootnoteByWord(volumeId, bookId, chapter, verseNumber, word);
+  }
+
+  // On-Device Dictionary
+  DictionaryEntry lookupDictionary(String word) {
+    return ScriptureDictionary.lookup(word);
   }
 
   // Global Search
@@ -236,7 +325,7 @@ class AppState extends ChangeNotifier {
 
     final results = <SearchResult>[];
 
-    // 1. Search Scripture Verses (unless notes-only requested)
+    // 1. Search Scripture Verses
     if (!searchNotesOnly) {
       final allVerses = ScriptureRepository.getAllSearchableVerses();
       for (final v in allVerses) {
@@ -259,27 +348,28 @@ class AppState extends ChangeNotifier {
       }
     }
 
-    // 2. Search User Notes & Annotations
+    // 2. Search Notes & Tags
     for (final ann in _annotations.values) {
       if (volumeFilter != null && ann.volumeId != volumeFilter) {
         continue;
       }
 
-      if (ann.note != null && ann.note!.toLowerCase().contains(cleanQuery)) {
-        final volume = ScriptureCanon.getVolume(ann.volumeId);
-        final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
-        final verses = ScriptureRepository.getChapterVerses(ann.volumeId, ann.bookId, ann.chapter);
-        final verseText = verses.firstWhere(
-          (v) => v.verseNumber == ann.verseNumber,
-          orElse: () => ScriptureVerse(
-            volumeId: ann.volumeId,
-            bookId: ann.bookId,
-            chapter: ann.chapter,
-            verseNumber: ann.verseNumber,
-            text: 'Verse ${ann.verseNumber}',
-          ),
-        ).text;
+      final volume = ScriptureCanon.getVolume(ann.volumeId);
+      final book = ScriptureCanon.getBook(ann.volumeId, ann.bookId);
+      final verses = ScriptureRepository.getChapterVerses(ann.volumeId, ann.bookId, ann.chapter);
+      final verseText = verses.firstWhere(
+        (v) => v.verseNumber == ann.verseNumber,
+        orElse: () => ScriptureVerse(
+          volumeId: ann.volumeId,
+          bookId: ann.bookId,
+          chapter: ann.chapter,
+          verseNumber: ann.verseNumber,
+          text: 'Verse ${ann.verseNumber}',
+        ),
+      ).text;
 
+      // Note match
+      if (ann.note != null && ann.note!.toLowerCase().contains(cleanQuery)) {
         results.add(SearchResult(
           volumeTitle: volume.shortTitle,
           bookTitle: book?.title ?? ann.bookId,
@@ -289,6 +379,22 @@ class AppState extends ChangeNotifier {
           matchedNote: ann.note,
           isNoteMatch: true,
         ));
+      }
+
+      // Tag match
+      for (final tag in ann.tags) {
+        if (tag.toLowerCase().contains(cleanQuery)) {
+          results.add(SearchResult(
+            volumeTitle: volume.shortTitle,
+            bookTitle: book?.title ?? ann.bookId,
+            chapter: ann.chapter,
+            verseNumber: ann.verseNumber,
+            verseText: verseText,
+            matchedTag: tag,
+            isTagMatch: true,
+          ));
+          break;
+        }
       }
     }
 

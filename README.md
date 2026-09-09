@@ -8,7 +8,7 @@
 
 ## Overview
 
-**B.O.M.B** is built from the ground up as a high-performance, distraction-free scripture study tool. It bridges the text of the **Book of Mormon**, the **Old Testament**, and the **New Testament**, enabling quick hierarchical navigation, cross-volume search, multi-color highlighting, personal note-taking, and customizable reading typography across all major operating systems.
+**B.O.M.B** is built from the ground up as a high-performance, distraction-free scripture study tool. It bridges the text of the **Book of Mormon**, the **Old Testament**, and the **New Testament**, enabling quick hierarchical navigation, cross-volume search, multi-color highlighting, personal note-taking, custom tag-based cross-referencing, Church-standard footnote cross-references, and an on-device dictionary across all major operating systems.
 
 ---
 
@@ -22,26 +22,42 @@
   2. **Book** (e.g., *Matthew*, *1 Nephi*, *Genesis*, *Alma*)
   3. **Chapter** (clean numeric grid to jump straight to any chapter)
 
-### 2. Comprehensive Scripture & Note Search
+### 2. Church-Standard Footnote Cross-References (Blue Links)
+- **Blue Interactive Words:** Words with official Latter-day Saint style footnotes appear in royal blue with superscript footnote markers (e.g., `goodly¹ᵃ`, `mysteries¹ᵇ`, `commanded⁷ᵃ`).
+- **Footnote Popup Sheet:** Tapping a blue word opens an interactive modal containing:
+  - **Linguistic Meaning & Definitions:** Hebrew (*HEB*) and Greek (*GR*) roots or theological commentary.
+  - **Topical Guide (TG) Links:** Shows doctrinal topics (e.g., *TG Faith*, *TG Mysteries of Godliness*, *TG Temple*).
+  - **Scripture Cross-References:** Previews related passages across the Old Testament, New Testament, and Book of Mormon with one-tap jump buttons.
+  - **Define Button:** Immediate shortcut to the full on-device dictionary definition.
+
+### 3. Verse Tagging & Personal Cross-Referencing
+- **Custom Tagging:** Attach multiple topic tags (e.g., `#Faith`, `#Commandments`, `#Prayer`, `#Covenants`) to any verse.
+- **Personal Cross-Reference Links:** Link scriptures together (e.g., connect *1 Nephi 3:7* with *Philippians 4:13* or *James 1:5*).
+- **Tags & Cross-Reference Explorer:** Centralized tab in the Notes screen to browse all tagged scriptures grouped by topic, view linked verse connections, and navigate immediately.
+
+### 4. On-Device Scripture Dictionary Lookup
+- Offline dictionary engine covering archaic King James English, Hebrew/Greek roots, and doctrinal terminology (e.g., *goodly*, *mysteries*, *afflictions*, *strait*, *succor*, *charity*, *grace*, *atonement*, *firmament*, *wisdom*).
+- Search any word on-device to view pronunciation, part of speech, full definition, etymology, and canonical scripture occurrences.
+
+### 5. Comprehensive Scripture, Note & Tag Search
 - Global search engine querying both the Book of Mormon and the Bible simultaneously.
-- **Search Filters:** Filter queries across *All Scriptures*, *Book of Mormon*, *Old Testament*, *New Testament*, or exclusively *My Notes*.
-- **Note Indexing:** Personal study notes are indexed and searchable alongside canonical verses.
+- **Search Filters:** Filter queries across *All Scriptures*, *Book of Mormon*, *Old Testament*, *New Testament*, or exclusively *My Notes & Tags*.
+- **Unified Indexing:** Personal study notes and custom tags are indexed and searchable alongside canonical verses.
 - Direct jump from any search result into the scripture reader.
 
-### 3. Verse Markup & Note-Taking
+### 6. Verse Markup & Note-Taking
 - Tap any verse to open the **Verse Markup Sheet**:
-  - **Highlighting:** 5 curated pastel highlight palettes (*Yellow*, *Green*, *Blue*, *Coral*, *Purple*) plus an eraser to remove highlights.
-  - **Study Notes:** Add, edit, or delete personal commentary and cross-references directly attached to verses.
-  - **Copy & Share:** Fast verse copying with formatted scripture references.
-- **My Notes & Highlights Manager:** A dedicated study hub listing all saved notes and highlighted verses with direct navigation back to the text.
+  - **Highlights:** 5 pastel highlight tones (*Yellow*, *Green*, *Blue*, *Coral*, *Purple*) plus an eraser to remove highlights.
+  - **Study Notes:** Add, edit, or delete personal commentary attached directly to verses.
+  - **Copy Action:** Formats and copies verse text with book, chapter, and verse references to the clipboard.
 
-### 4. Reading Styles & Custom Typography
+### 7. Reading Styles & Custom Typography
 - **Display Themes:** System Default, Light, and Dark mode.
 - **Typeface Selection:**
   - *Times New Roman / Editorial Serif* (traditional, elegant scripture typography)
   - *Arial / Clean Sans-Serif* (modern high-legibility sans)
-  - *Georgia / Soft Serif* (warm, comfortable digital reading)
-- **Dynamic Font Sizing:** Live slider ranging from 13pt to 28pt with a real-time typography preview window.
+  - *Georgia / Soft Serif* (warm digital reading)
+- **Font Scaling:** Live slider from 13 pt to 28 pt with a real-time typography preview window.
 
 ---
 
@@ -54,44 +70,6 @@
 | **Windows** | Extended | Native x64 Executable (.exe) | Supported via Flutter Desktop |
 | **macOS** | Extended | Universal Binary (.app / dmg) | Supported via Flutter Desktop |
 | **Linux** | Extended | GTK+ Native Binary / Flatpak / Snap | Supported via Flutter Desktop |
-
----
-
-## Project Structure
-
-```text
-lib/
-├── main.dart                                   # Entry point & binding initialization
-├── app.dart                                    # Root MaterialApp, theme mode & AppScope
-├── core/
-│   ├── constants/
-│   │   └── app_constants.dart                  # Global volume and scripture metadata
-│   ├── data/
-│   │   ├── scripture_canon.dart                # Complete Book of Mormon & Bible book definitions
-│   │   └── scripture_repository.dart           # Offline verse provider & searchable database
-│   ├── models/
-│   │   └── scripture_models.dart               # Volume, Book, Verse, Annotation & Search models
-│   ├── state/
-│   │   ├── app_scope.dart                      # InheritedNotifier for dependency injection
-│   │   └── app_state.dart                      # State: navigation, reading styles, markup, search
-│   └── theme/
-│       └── app_theme.dart                      # Material 3 light/dark reader palettes
-└── features/
-    ├── navigation/presentation/
-    │   ├── main_shell.dart                     # Adaptive navigation (BottomNav on mobile, NavRail on desktop)
-    │   └── scripture_picker_dialog.dart        # 3-step Volume -> Book -> Chapter picker
-    ├── reader/presentation/
-    │   ├── reader_screen.dart                  # Chapter reader, inline highlights & note badges
-    │   └── verse_markup_sheet.dart             # Highlighting & note-taking bottom sheet
-    ├── search/presentation/
-    │   └── search_screen.dart                  # Multi-volume & personal notes search engine
-    ├── notes/presentation/
-    │   └── notes_screen.dart                   # Notes & highlights browser hub
-    ├── study/presentation/
-    │   └── parallel_study_screen.dart          # Side-by-side comparative reading view
-    └── settings/presentation/
-        └── settings_screen.dart                # Theme, font family, font size & translation controls
-```
 
 ---
 

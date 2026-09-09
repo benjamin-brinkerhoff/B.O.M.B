@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
 
-/// Global scripture and user note search screen.
+/// Global scripture, tag, and personal note search engine.
 class SearchScreen extends StatefulWidget {
   final VoidCallback onNavigateToReader;
 
@@ -45,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Scriptures & Notes', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Search Scriptures, Notes & Tags', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
@@ -54,9 +54,8 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               controller: _searchController,
-              autofocus: false,
               decoration: InputDecoration(
-                hintText: 'Search verses, quotes, or notes (e.g. faith, light, nephi)...',
+                hintText: 'Search verses, quotes, tags (e.g. faith, commandments)...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: query.isNotEmpty
                     ? IconButton(
@@ -90,7 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 const SizedBox(width: 8),
                 _buildFilterChip('New Testament', 'nt'),
                 const SizedBox(width: 8),
-                _buildFilterChip('My Notes', 'notes', icon: Icons.note_alt_outlined),
+                _buildFilterChip('My Notes & Tags', 'notes', icon: Icons.note_alt_outlined),
               ],
             ),
           ),
@@ -139,14 +138,14 @@ class _SearchScreenState extends State<SearchScreen> {
           Icon(Icons.search, size: 64, color: theme.colorScheme.outline.withOpacity(0.5)),
           const SizedBox(height: 16),
           Text(
-            'Search across all scripture volumes and your personal study notes.',
+            'Search across all scriptures, personal notes, and tags.',
             style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
-            children: ['faith', 'charity', 'commandments', 'shepherd', 'prayer'].map((s) {
+            children: ['faith', 'commandments', 'prayer', 'shepherd', 'charity'].map((s) {
               return ActionChip(
                 label: Text(s),
                 onPressed: () {
@@ -172,13 +171,13 @@ class _SearchScreenState extends State<SearchScreen> {
             const Icon(Icons.search_off, size: 56, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
-              'No matching verses or notes found for "$query"',
+              'No results found for "$query"',
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             const Text(
-              'Try different keywords, checking your spelling, or selecting "All" filters.',
+              'Try adjusting your search terms or clearing active filters.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -199,7 +198,6 @@ class _SearchScreenState extends State<SearchScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          // Resolve volume & book id
           final volId = res.volumeTitle.contains('Mormon')
               ? 'bom'
               : (res.volumeTitle.contains('Old') ? 'ot' : 'nt');
@@ -250,20 +248,23 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const Spacer(),
-                  if (res.isNoteMatch)
+                  if (res.isTagMatch)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text('#\${res.matchedTag}', style: const TextStyle(fontSize: 11, color: Colors.teal, fontWeight: FontWeight.bold)),
+                    )
+                  else if (res.isNoteMatch)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.amber.shade100,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.edit_note, size: 14, color: Colors.brown),
-                          SizedBox(width: 2),
-                          Text('My Note', style: TextStyle(fontSize: 11, color: Colors.brown)),
-                        ],
-                      ),
+                      child: const Text('My Note', style: TextStyle(fontSize: 11, color: Colors.brown)),
                     ),
                 ],
               ),
@@ -282,17 +283,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.format_quote, size: 16),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Note: \${res.matchedNote}',
-                          style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 13),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Note: \${res.matchedNote}',
+                    style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 13),
                   ),
                 ),
               ],

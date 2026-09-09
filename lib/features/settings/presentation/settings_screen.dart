@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/data/scripture_canon.dart';
 import '../../../core/state/app_scope.dart';
+import '../../study_tools/presentation/dictionary_lookup_sheet.dart';
 
-/// Screen for controlling reading styles: theme (light/dark), font family, font size, and translations.
+/// Screen for controlling reading styles: theme (light/dark), font family, font size,
+/// translations, and on-device dictionary access.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -45,7 +47,25 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          // Dictionary Tool Shortcut
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: theme.colorScheme.outlineVariant),
+            ),
+            child: ListTile(
+              leading: const Icon(Icons.spellcheck, color: Color(0xFF1976D2)),
+              title: const Text('On-Device Scripture Dictionary', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('Look up definitions for archaic, Hebrew, and scriptural words offline'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => DictionaryLookupSheet.show(context),
+            ),
+          ),
+
+          const SizedBox(height: 20),
 
           // Section: Theme Mode
           const Text('Display Theme', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -112,7 +132,6 @@ class SettingsScreen extends StatelessWidget {
           const Text('Primary Bible Translation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           ...ScriptureCanon.bibleVersions.map((v) {
-            final isSelected = v.id == state.currentBibleVersionId;
             return RadioListTile<String>(
               title: Text('\${v.name} (\${v.abbreviation})'),
               subtitle: Text(v.description),
