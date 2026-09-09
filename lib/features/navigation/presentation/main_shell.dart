@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../home/presentation/home_screen.dart';
 import '../../reader/presentation/reader_screen.dart';
 import '../../search/presentation/search_screen.dart';
 import '../../notes/presentation/notes_screen.dart';
@@ -19,12 +20,18 @@ class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
   void _navigateToReader() {
-    setState(() => _selectedIndex = 0);
+    setState(() => _selectedIndex = 1);
   }
 
   @override
   Widget build(BuildContext context) {
     final destinations = [
+      HomeScreen(
+        onNavigateToReader: _navigateToReader,
+        onNavigateToSearch: () => setState(() => _selectedIndex = 2),
+        onNavigateToNotes: () => setState(() => _selectedIndex = 3),
+        onNavigateToParallel: () => setState(() => _selectedIndex = 4),
+      ),
       const ReaderScreen(),
       SearchScreen(onNavigateToReader: _navigateToReader),
       NotesScreen(onNavigateToReader: _navigateToReader),
@@ -65,6 +72,11 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
                     NavigationRailDestination(
                       icon: Icon(Icons.auto_stories_outlined),
                       selectedIcon: Icon(Icons.auto_stories),
@@ -107,6 +119,11 @@ class _MainShellState extends State<MainShell> {
                 setState(() => _selectedIndex = index);
               },
               destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: 'Home',
+                ),
                 NavigationDestination(
                   icon: Icon(Icons.auto_stories_outlined),
                   selectedIcon: Icon(Icons.auto_stories),

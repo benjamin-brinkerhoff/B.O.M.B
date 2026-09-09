@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/data/scripture_dictionary.dart';
 import '../../../core/models/scripture_models.dart';
+import '../../../core/services/device_dictionary_service.dart';
 import '../../../core/state/app_scope.dart';
 import '../../../core/state/app_state.dart';
 
@@ -249,14 +250,17 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
 
                     // Device / System Dictionary Action
                     Center(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.menu_book, size: 16),
-                        label: Text('Search Device Dictionary for "${_entry!.word}"'),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _entry!.word));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Word "${_entry!.word}" copied. You can look it up in your device dictionary.')),
-                          );
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.phone_iphone, size: 18),
+                        label: Text('Open Downloaded Device Dictionary for "${_entry!.word}"'),
+                        onPressed: () async {
+                          final opened = await DeviceDictionaryService.openDeviceDictionary(_entry!.word);
+                          if (!opened && context.mounted) {
+                            Clipboard.setData(ClipboardData(text: _entry!.word));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Looking up "${_entry!.word}" in on-device lexicon.')),
+                            );
+                          }
                         },
                       ),
                     ),

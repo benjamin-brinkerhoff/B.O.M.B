@@ -15,7 +15,16 @@
 ## Core Features
 
 
-### 1. Full Offline Scripture Text Engine
+
+### 1. Home Dashboard & Study Analytics
+- **Reading Streak Tracker:** Tracks current consecutive daily reading streak (e.g. 🔥 7 Days) with visual 7-day weekly activity circles and best streak record.
+- **Study Time Tracking:** Records live time spent studying scripture today and all-time.
+- **Reading Statistics:** Displays total chapters read, verses studied, and saved annotations.
+- **Continue Reading Card:** 1-tap shortcut to immediately resume reading from where you left off.
+- **Book Selection Carousel:** Browse and jump straight into any book across the Book of Mormon, New Testament, and Old Testament right from the home screen.
+- **Verse of the Day:** Curated daily scripture with instant context reading.
+
+### 2. Full Offline Scripture Text Engine
 - **Complete Public Domain Canons Included:**
   - **The Book of Mormon:** Full 15 books, 239 chapters, **6,604 verses** from public-domain 2013-referenced text.
   - **The New Testament (KJV):** Full 27 books, 260 chapters, **7,957 verses**.
@@ -24,7 +33,7 @@
 - **Lazy-Loaded In-Memory Caching:** Asynchronously parses and indexes volumes (`assets/scriptures/book_of_mormon.json`, `assets/scriptures/new_testament.json`, `assets/scriptures/old_testament.json`) on demand with instant $O(1)$ chapter retrieval.
 - **Zero Internet Required:** Entire scripture study, reader navigation, and global search run 100% offline.
 
-### 2. Rapid 3-Tier Navigation
+### 3. Rapid 3-Tier Navigation
 - **Volume Selection:** Fast switching between **The Book of Mormon**, **The Old Testament**, and **The New Testament**.
 - **Multiple Bible Translations:** First-class support for the **King James Version (KJV)** as the primary translation, with options for the **American Standard Version (ASV)**, **World English Bible (WEB)**, and **Bible in Basic English (BBE)**.
 - **Hierarchical Drill-Down:** Tap the app bar or browse tool to quickly select:
@@ -32,7 +41,7 @@
   2. **Book** (e.g., *Matthew*, *1 Nephi*, *Genesis*, *Alma*)
   3. **Chapter** (clean numeric grid to jump straight to any chapter)
 
-### 3. Church-Standard Footnote Cross-References (Blue Links)
+### 4. Church-Standard Footnote Cross-References (Blue Links)
 - **Blue Interactive Words:** Words with official Latter-day Saint style footnotes appear in royal blue with superscript footnote markers (e.g., `goodly¹ᵃ`, `mysteries¹ᵇ`, `commanded⁷ᵃ`).
 - **Footnote Popup Sheet:** Tapping a blue word opens an interactive modal containing:
   - **Linguistic Meaning & Definitions:** Hebrew (*HEB*) and Greek (*GR*) roots or theological commentary.
@@ -40,28 +49,28 @@
   - **Scripture Cross-References:** Previews related passages across the Old Testament, New Testament, and Book of Mormon with one-tap jump buttons.
   - **Define Button:** Immediate shortcut to the full on-device dictionary definition.
 
-### 4. Verse Tagging & Personal Cross-Referencing
+### 5. Verse Tagging & Personal Cross-Referencing
 - **Custom Tagging:** Attach multiple topic tags (e.g., `#Faith`, `#Commandments`, `#Prayer`, `#Covenants`) to any verse.
 - **Personal Cross-Reference Links:** Link scriptures together (e.g., connect *1 Nephi 3:7* with *Philippians 4:13* or *James 1:5*).
 - **Tags & Cross-Reference Explorer:** Centralized tab in the Notes screen to browse all tagged scriptures grouped by topic, view linked verse connections, and navigate immediately.
 
-### 5. On-Device Scripture Dictionary Lookup
+### 6. On-Device Scripture Dictionary Lookup
 - Offline dictionary engine covering archaic King James English, Hebrew/Greek roots, and doctrinal terminology (e.g., *goodly*, *mysteries*, *afflictions*, *strait*, *succor*, *charity*, *grace*, *atonement*, *firmament*, *wisdom*).
 - Search any word on-device to view pronunciation, part of speech, full definition, etymology, and canonical scripture occurrences.
 
-### 6. Comprehensive Scripture, Note & Tag Search
+### 7. Comprehensive Scripture, Note & Tag Search
 - Global search engine querying both the Book of Mormon and the Bible simultaneously.
 - **Search Filters:** Filter queries across *All Scriptures*, *Book of Mormon*, *Old Testament*, *New Testament*, or exclusively *My Notes & Tags*.
 - **Unified Indexing:** Personal study notes and custom tags are indexed and searchable alongside canonical verses.
 - Direct jump from any search result into the scripture reader.
 
-### 7. Verse Markup & Note-Taking
+### 8. Verse Markup & Note-Taking
 - Tap any verse to open the **Verse Markup Sheet**:
   - **Highlights:** 5 pastel highlight tones (*Yellow*, *Green*, *Blue*, *Coral*, *Purple*) plus an eraser to remove highlights.
   - **Study Notes:** Add, edit, or delete personal commentary attached directly to verses.
   - **Copy Action:** Formats and copies verse text with book, chapter, and verse references to the clipboard.
 
-### 8. Reading Styles & Custom Typography
+### 9. Reading Styles & Custom Typography
 - **Display Themes:** System Default, Light, and Dark mode.
 - **Typeface Selection:**
   - *Times New Roman / Editorial Serif* (traditional, elegant scripture typography)

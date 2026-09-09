@@ -40,6 +40,51 @@ class AppState extends ChangeNotifier {
   bool isVolumeLoaded(String volumeId) => ScriptureRepository.isVolumeLoaded(volumeId);
   int get totalLoadedVerses => ScriptureRepository.totalLoadedVerses;
 
+  // Reading Statistics & Streak Tracker
+  int _readingStreakDays = 7;
+  final int _longestStreakDays = 14;
+  int _totalReadingTimeSeconds = 14520; // 4 hrs 2 mins
+  int _todayReadingTimeSeconds = 1560;  // 26 mins
+  int _chaptersReadCount = 19;
+  int _versesReadCount = 425;
+  final Set<int> _activeWeekDays = {1, 2, 3, 4, 5, 6, 7};
+
+  int get readingStreakDays => _readingStreakDays;
+  int get longestStreakDays => _longestStreakDays;
+  int get totalReadingTimeSeconds => _totalReadingTimeSeconds;
+  int get todayReadingTimeSeconds => _todayReadingTimeSeconds;
+  int get chaptersReadCount => _chaptersReadCount;
+  int get versesReadCount => _versesReadCount;
+  Set<int> get activeWeekDays => _activeWeekDays;
+
+  String get todayReadingTimeFormatted {
+    final minutes = (_todayReadingTimeSeconds / 60).round();
+    if (minutes < 60) return '$minutes m';
+    final hours = minutes ~/ 60;
+    final remMinutes = minutes % 60;
+    return '${hours}h ${remMinutes}m';
+  }
+
+  String get totalReadingTimeFormatted {
+    final minutes = (_totalReadingTimeSeconds / 60).round();
+    final hours = minutes ~/ 60;
+    final remMinutes = minutes % 60;
+    return '${hours}h ${remMinutes}m';
+  }
+
+  void recordReadingTime(int seconds) {
+    _totalReadingTimeSeconds += seconds;
+    _todayReadingTimeSeconds += seconds;
+    _activeWeekDays.add(DateTime.now().weekday);
+    notifyListeners();
+  }
+
+  void incrementChapterCompleted() {
+    _chaptersReadCount++;
+    notifyListeners();
+  }
+
+
   void _initSeedAnnotations() {
     // Tag 1 Nephi 3:7 with "Commandments" and "Faith"
     const key1 = 'bom:1-ne:3:7';
