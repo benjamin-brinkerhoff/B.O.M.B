@@ -14,7 +14,17 @@
 
 ## Core Features
 
-### 1. Rapid 3-Tier Navigation
+
+### 1. Full Offline Scripture Text Engine
+- **Complete Public Domain Canons Included:**
+  - **The Book of Mormon:** Full 15 books, 239 chapters, **6,604 verses** from public-domain 2013-referenced text.
+  - **The New Testament (KJV):** Full 27 books, 260 chapters, **7,957 verses**.
+  - **The Old Testament (KJV):** Full 39 books, 929 chapters, **23,145 verses**.
+- **Total:** **37,706 verses** bundled offline inside the application.
+- **Lazy-Loaded In-Memory Caching:** Asynchronously parses and indexes volumes (`assets/scriptures/book_of_mormon.json`, `assets/scriptures/new_testament.json`, `assets/scriptures/old_testament.json`) on demand with instant $O(1)$ chapter retrieval.
+- **Zero Internet Required:** Entire scripture study, reader navigation, and global search run 100% offline.
+
+### 2. Rapid 3-Tier Navigation
 - **Volume Selection:** Fast switching between **The Book of Mormon**, **The Old Testament**, and **The New Testament**.
 - **Multiple Bible Translations:** First-class support for the **King James Version (KJV)** as the primary translation, with options for the **American Standard Version (ASV)**, **World English Bible (WEB)**, and **Bible in Basic English (BBE)**.
 - **Hierarchical Drill-Down:** Tap the app bar or browse tool to quickly select:
@@ -22,7 +32,7 @@
   2. **Book** (e.g., *Matthew*, *1 Nephi*, *Genesis*, *Alma*)
   3. **Chapter** (clean numeric grid to jump straight to any chapter)
 
-### 2. Church-Standard Footnote Cross-References (Blue Links)
+### 3. Church-Standard Footnote Cross-References (Blue Links)
 - **Blue Interactive Words:** Words with official Latter-day Saint style footnotes appear in royal blue with superscript footnote markers (e.g., `goodly¹ᵃ`, `mysteries¹ᵇ`, `commanded⁷ᵃ`).
 - **Footnote Popup Sheet:** Tapping a blue word opens an interactive modal containing:
   - **Linguistic Meaning & Definitions:** Hebrew (*HEB*) and Greek (*GR*) roots or theological commentary.
@@ -30,28 +40,28 @@
   - **Scripture Cross-References:** Previews related passages across the Old Testament, New Testament, and Book of Mormon with one-tap jump buttons.
   - **Define Button:** Immediate shortcut to the full on-device dictionary definition.
 
-### 3. Verse Tagging & Personal Cross-Referencing
+### 4. Verse Tagging & Personal Cross-Referencing
 - **Custom Tagging:** Attach multiple topic tags (e.g., `#Faith`, `#Commandments`, `#Prayer`, `#Covenants`) to any verse.
 - **Personal Cross-Reference Links:** Link scriptures together (e.g., connect *1 Nephi 3:7* with *Philippians 4:13* or *James 1:5*).
 - **Tags & Cross-Reference Explorer:** Centralized tab in the Notes screen to browse all tagged scriptures grouped by topic, view linked verse connections, and navigate immediately.
 
-### 4. On-Device Scripture Dictionary Lookup
+### 5. On-Device Scripture Dictionary Lookup
 - Offline dictionary engine covering archaic King James English, Hebrew/Greek roots, and doctrinal terminology (e.g., *goodly*, *mysteries*, *afflictions*, *strait*, *succor*, *charity*, *grace*, *atonement*, *firmament*, *wisdom*).
 - Search any word on-device to view pronunciation, part of speech, full definition, etymology, and canonical scripture occurrences.
 
-### 5. Comprehensive Scripture, Note & Tag Search
+### 6. Comprehensive Scripture, Note & Tag Search
 - Global search engine querying both the Book of Mormon and the Bible simultaneously.
 - **Search Filters:** Filter queries across *All Scriptures*, *Book of Mormon*, *Old Testament*, *New Testament*, or exclusively *My Notes & Tags*.
 - **Unified Indexing:** Personal study notes and custom tags are indexed and searchable alongside canonical verses.
 - Direct jump from any search result into the scripture reader.
 
-### 6. Verse Markup & Note-Taking
+### 7. Verse Markup & Note-Taking
 - Tap any verse to open the **Verse Markup Sheet**:
   - **Highlights:** 5 pastel highlight tones (*Yellow*, *Green*, *Blue*, *Coral*, *Purple*) plus an eraser to remove highlights.
   - **Study Notes:** Add, edit, or delete personal commentary attached directly to verses.
   - **Copy Action:** Formats and copies verse text with book, chapter, and verse references to the clipboard.
 
-### 7. Reading Styles & Custom Typography
+### 8. Reading Styles & Custom Typography
 - **Display Themes:** System Default, Light, and Dark mode.
 - **Typeface Selection:**
   - *Times New Roman / Editorial Serif* (traditional, elegant scripture typography)

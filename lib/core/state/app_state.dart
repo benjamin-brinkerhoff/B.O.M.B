@@ -28,7 +28,17 @@ class AppState extends ChangeNotifier {
   // Default demo tags and links for immediate testing
   AppState() {
     _initSeedAnnotations();
+    _initScriptures();
   }
+
+  void _initScriptures() {
+    ScriptureRepository.initialize().then((_) {
+      notifyListeners();
+    });
+  }
+
+  bool isVolumeLoaded(String volumeId) => ScriptureRepository.isVolumeLoaded(volumeId);
+  int get totalLoadedVerses => ScriptureRepository.totalLoadedVerses;
 
   void _initSeedAnnotations() {
     // Tag 1 Nephi 3:7 with "Commandments" and "Faith"
@@ -128,6 +138,11 @@ class AppState extends ChangeNotifier {
     _currentBookId = bookId;
     _currentChapter = chapter;
     _targetVerse = verse;
+    if (!ScriptureRepository.isVolumeLoaded(volumeId)) {
+      ScriptureRepository.initializeVolume(volumeId).then((_) {
+        notifyListeners();
+      });
+    }
     notifyListeners();
   }
 

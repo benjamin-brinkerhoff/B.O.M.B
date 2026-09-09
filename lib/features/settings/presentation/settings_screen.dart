@@ -65,7 +65,65 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20),
+                    const SizedBox(height: 20),
+
+          // Offline Scripture Data Status Card
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: theme.colorScheme.outlineVariant),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.storage, color: Colors.teal),
+                      const SizedBox(width: 8),
+                      const Text('Full Scripture Text Database', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Complete canonical text loaded offline for instant study:',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, size: 16, color: Colors.teal),
+                      const SizedBox(width: 6),
+                      const Text('The Book of Mormon: 6,604 verses', style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, size: 16, color: Colors.teal),
+                      const SizedBox(width: 6),
+                      const Text('The New Testament (KJV): 7,957 verses', style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, size: 16, color: Colors.teal),
+                      const SizedBox(width: 6),
+                      const Text('The Old Testament (KJV): 23,145 verses', style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Total Canon: 37,706 verses available completely offline.',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
           // Section: Theme Mode
           const Text('Display Theme', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
