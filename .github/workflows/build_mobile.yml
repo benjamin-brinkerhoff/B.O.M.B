@@ -1,0 +1,155 @@
+name: Build Mobile (Android APK & Unsigned iOS IPA)
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_apk:
+        description: 'Build Android APK'
+        required: true
+        type: boolean
+        default: true
+      build_ipa:
+        description: 'Build Unsigned iOS IPA'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  # ============================================================
+  # Android APK Build Job
+  # ============================================================
+  build_android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_apk }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Ensure Android platform scaffolding exists
+        run: |
+          if [ ! -d "android" ]; then
+            echo "Generating Android platform runner..."
+            flutter create --platforms=android --org com.bomb.study .
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android Release APK
+        run: flutter build apk --release
+
+      - name: Stage Android APK
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/B.O.M.B-release.apk
+          ls -lh dist/B.O.M.B-release.apk
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: B.O.M.B-Android-APK
+          path: dist/B.O.M.B-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  # ============================================================
+  # iOS Unsigned IPA Build Job
+  # ============================================================
+  build_ios:
+    name: Build Unsigned iOS IPA
+    runs-on: macos-14
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_ipa }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Ensure iOS platform scaffolding exists
+        run: |
+          if [ ! -d "ios" ]; then
+            echo "Generating iOS platform runner..."
+            flutter create --platforms=ios --org com.bomb.study .
+          fi
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          cd ios
+          pod install || true
+          cd ..
+
+      - name: Build Unsigned iOS Application
+        run: flutter build ios --release --no-codesign
+
+      - name: Package Unsigned iOS IPA
+        run: |
+          mkdir -p dist
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -q ../../../dist/B.O.M.B-unsigned.ipa Payload
+          cd ../../..
+          ls -lh dist/B.O.M.B-unsigned.ipa
+
+      - name: Upload Unsigned iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: B.O.M.B-iOS-Unsigned-IPA
+          path: dist/B.O.M.B-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+  # ============================================================
+  # Optional Release Publishing on Git Tags (e.g. v1.0.0)
+  # ============================================================
+  release:
+    name: Publish GitHub Release
+    needs: [build_android, build_ios]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Android APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: B.O.M.B-Android-APK
+          path: dist
+
+      - name: Download iOS IPA Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: B.O.M.B-iOS-Unsigned-IPA
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/B.O.M.B-release.apk
+            dist/B.O.M.B-unsigned.ipa
+          generate_release_notes: true

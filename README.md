@@ -61,6 +61,23 @@
 
 ---
 
+
+---
+
+## Automated Builds & CI/CD
+
+This repository includes an automated GitHub Actions workflow (`.github/workflows/build_mobile.yml`) that builds:
+1. **Android APK**: Signed release APK (`B.O.M.B-release.apk`) ready for direct sideloading or distribution on Android devices.
+2. **Unsigned iOS IPA**: Packaged unsigned IPA (`B.O.M.B-unsigned.ipa`) suitable for sideloading tools (AltStore, Sideloadly, TrollStore) or re-signing with personal developer certificates.
+
+### How to Download Builds
+1. Navigate to the **[Actions tab](https://github.com/benjamin-brinkerhoff/B.O.M.B/actions)** on GitHub.
+2. Click on the latest run under **Build Mobile (Android APK & Unsigned iOS IPA)**.
+3. Scroll down to the **Artifacts** section to download:
+   - `B.O.M.B-Android-APK`
+   - `B.O.M.B-iOS-Unsigned-IPA`
+4. You can also manually trigger builds anytime by clicking **Run workflow** in the Actions tab.
+
 ## Supported Platforms
 
 | Platform | Tier | Target Output | Status |
