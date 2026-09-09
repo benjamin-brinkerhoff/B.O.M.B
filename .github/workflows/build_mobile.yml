@@ -36,7 +36,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -95,7 +94,7 @@ jobs:
             flutter create --platforms=ios --org com.bomb.study .
           fi
 
-      - name: Install dependencies
+      - name: Install dependencies & CocoaPods
         run: |
           flutter pub get
           cd ios
@@ -103,12 +102,22 @@ jobs:
           cd ..
 
       - name: Build Unsigned iOS Application
-        run: flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign --simulator
 
       - name: Package Unsigned iOS IPA
         run: |
           mkdir -p dist
-          cd build/ios/iphoneos
+          APP_DIR=""
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            APP_DIR="build/ios/iphoneos"
+          elif [ -d "build/ios/iphonesimulator/Runner.app" ]; then
+            APP_DIR="build/ios/iphonesimulator"
+          else
+            echo "Searching for Runner.app..."
+            APP_DIR=$(dirname $(find build/ios -name "Runner.app" | head -n 1))
+          fi
+          echo "Packaging Runner.app from $APP_DIR"
+          cd "$APP_DIR"
           mkdir -p Payload
           cp -r Runner.app Payload/
           zip -r -q ../../../dist/B.O.M.B-unsigned.ipa Payload
