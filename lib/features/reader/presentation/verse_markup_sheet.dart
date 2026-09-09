@@ -95,6 +95,16 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
     _tagController.clear();
   }
 
+    List<String> _extractUniqueWords(String text) {
+    final clean = text.replaceAll(RegExp(r'[^a-zA-Z\s]'), '');
+    final words = clean.split(RegExp(r'\s+'))
+        .map((w) => w.trim().toLowerCase())
+        .where((w) => w.length > 3 && !['that', 'this', 'with', 'from', 'have', 'were', 'which', 'their', 'there', 'they'].contains(w))
+        .toSet()
+        .toList();
+    return words.take(8).toList();
+  }
+
   void _removeTag(String tag) {
     setState(() {
       _tags.remove(tag);
@@ -188,9 +198,28 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
               ),
             ),
 
-            const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-            // 1. Highlighting Section
+            // 1. Interactive Word Definitions
+            const Text('Define Words in this Verse', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: _extractUniqueWords(widget.verse.text).map((w) {
+                return ActionChip(
+                  avatar: const Icon(Icons.spellcheck, size: 14),
+                  label: Text(w, style: const TextStyle(fontSize: 12)),
+                  onPressed: () {
+                    DictionaryLookupSheet.show(context, initialWord: w);
+                  },
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 2. Highlighting Section
             const Text('Highlight Color', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 8),
             Row(
@@ -244,7 +273,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
 
             const SizedBox(height: 16),
 
-            // 2. Personal Cross-Reference Linking Section
+            // 3. Personal Cross-Reference Linking Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -283,7 +312,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
 
             const SizedBox(height: 16),
 
-            // 3. Tagging & Topics Section
+            // 4. Tagging & Topics Section
             const Text('Tags & Study Topics', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 8),
 
@@ -340,7 +369,7 @@ class _VerseMarkupSheetState extends State<VerseMarkupSheet> {
 
             const SizedBox(height: 16),
 
-            // 4. Note Section
+            // 5. Note Section
             const Text('Personal Study Note', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 8),
             TextField(

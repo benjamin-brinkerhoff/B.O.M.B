@@ -4,6 +4,7 @@ import '../../../core/state/app_scope.dart';
 import '../../navigation/presentation/scripture_picker_dialog.dart';
 import 'verse_markup_sheet.dart';
 import 'footnote_spanned_text.dart';
+import '../../study_tools/presentation/dictionary_lookup_sheet.dart';
 
 /// Full interactive scripture reader supporting Church-standard blue footnotes,
 /// multi-color highlighting, personal notes, tag badges, and quick 3-tier navigation.
@@ -54,6 +55,11 @@ class ReaderScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.spellcheck),
+            tooltip: 'Dictionary & Lexicon',
+            onPressed: () => DictionaryLookupSheet.show(context),
+          ),
           IconButton(
             icon: const Icon(Icons.chevron_left),
             tooltip: 'Previous Chapter',

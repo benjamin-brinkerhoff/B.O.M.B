@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../core/data/scripture_dictionary.dart';
 import '../../../core/models/scripture_models.dart';
 import '../../../core/state/app_scope.dart';
+import '../../../core/state/app_state.dart';
 
-/// On-device dictionary lookup sheet for words and theological terms.
+/// Interactive on-device dictionary lookup sheet with autocomplete,
+/// rich theological/archaic definitions, and system dictionary search.
 class DictionaryLookupSheet extends StatefulWidget {
   final String? initialWord;
 
@@ -27,11 +31,14 @@ class DictionaryLookupSheet extends StatefulWidget {
 class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
   late TextEditingController _controller;
   DictionaryEntry? _entry;
+  List<String> _suggestions = [];
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialWord ?? '');
+    final initial = widget.initialWord ?? '';
+    _controller = TextEditingController(text: initial);
+    _suggestions = ScriptureDictionary.getSuggestions(initial);
   }
 
   @override
@@ -50,16 +57,20 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
   }
 
   void _search(String query) {
-    if (query.trim().isEmpty) return;
+    final clean = query.trim();
+    if (clean.isEmpty) return;
     final state = AppScope.of(context);
     setState(() {
-      _entry = state.lookupDictionary(query);
+      _controller.text = clean;
+      _entry = state.lookupDictionary(clean);
+      _suggestions = ScriptureDictionary.getSuggestions(clean);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final featuredWords = ScriptureDictionary.getFeaturedWords();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -86,9 +97,10 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
               ),
             ),
 
+            // Header
             Row(
               children: [
-                Icon(Icons.spellcheck, color: theme.colorScheme.primary),
+                const Icon(Icons.spellcheck, color: Color(0xFF1976D2)),
                 const SizedBox(width: 8),
                 Text(
                   'On-Device Scripture Dictionary',
@@ -107,21 +119,53 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
             // Search Bar
             TextField(
               controller: _controller,
+              autofocus: widget.initialWord == null,
               decoration: InputDecoration(
-                hintText: 'Enter word to define (e.g. charity, goodly, faith)...',
+                hintText: 'Search word to define (e.g. goodly, charity, grace)...',
                 prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: () => _search(_controller.text),
-                ),
+                suffixIcon: _controller.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _controller.clear();
+                            _suggestions = ScriptureDictionary.getSuggestions('');
+                          });
+                        },
+                      )
+                    : null,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
+              onChanged: (text) {
+                setState(() {
+                  _suggestions = ScriptureDictionary.getSuggestions(text);
+                });
+              },
               onSubmitted: _search,
             ),
 
+            // Suggestions / Autocomplete Bar
+            if (_suggestions.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _suggestions.map((s) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6.0),
+                      child: ActionChip(
+                        label: Text(s, style: const TextStyle(fontSize: 12)),
+                        onPressed: () => _search(s),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+
             const SizedBox(height: 16),
 
-            // Definition Result Box
+            // Definition Result Card
             if (_entry != null)
               Container(
                 width: double.infinity,
@@ -150,6 +194,17 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
                             color: theme.colorScheme.primary,
                           ),
                         ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 18),
+                          tooltip: 'Copy Definition',
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: '${_entry!.word} (${_entry!.partOfSpeech}): ${_entry!.definition}'));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Definition copied to clipboard')),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -172,12 +227,13 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
                     if (_entry!.sampleOccurrences.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Text(
-                        'Scriptural Occurrences:',
+                        'Canonical Scripture Occurrences:',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: theme.colorScheme.outline),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Wrap(
                         spacing: 6,
+                        runSpacing: 4,
                         children: _entry!.sampleOccurrences.map((occ) {
                           return Chip(
                             label: Text(occ, style: const TextStyle(fontSize: 11)),
@@ -186,11 +242,48 @@ class _DictionaryLookupSheetState extends State<DictionaryLookupSheet> {
                         }).toList(),
                       ),
                     ],
+
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 8),
+
+                    // Device / System Dictionary Action
+                    Center(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.menu_book, size: 16),
+                        label: Text('Search Device Dictionary for "${_entry!.word}"'),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: _entry!.word));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Word "${_entry!.word}" copied. You can look it up in your device dictionary.')),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
 
             const SizedBox(height: 16),
+
+            // Featured Study Terms
+            const Text(
+              'Explore Doctrinal & Archaic Terminology',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: featuredWords.map((w) {
+                return ActionChip(
+                  label: Text(w, style: const TextStyle(fontSize: 12)),
+                  onPressed: () => _search(w),
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),
