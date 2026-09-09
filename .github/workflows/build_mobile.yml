@@ -93,11 +93,14 @@ jobs:
             echo "Generating iOS platform runner..."
             flutter create --platforms=ios --org com.bomb.study .
           fi
-          # Set dummy DEVELOPMENT_TEAM in project.pbxproj so Flutter CLI checks pass without provisioning
-          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "0000000000";/g' ios/Runner.xcodeproj/project.pbxproj 2>/dev/null || true
-          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGN_IDENTITY=" >> ios/Flutter/Release.xcconfig
+          mkdir -p ios/Flutter
+          cat > ios/Flutter/Release.xcconfig <<'EOF'
+          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_REQUIRED=NO
+          CODE_SIGN_IDENTITY=
+          DEVELOPMENT_TEAM=
+          EOF
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj 2>/dev/null || true
 
       - name: Install dependencies & CocoaPods
         run: |

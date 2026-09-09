@@ -263,7 +263,7 @@ class ScriptureDictionary {
       word: 'israel',
       partOfSpeech: 'noun',
       definition: 'Literally "one who prevails with God"; the covenant people descended from Jacob or adopted into the covenant through baptism.',
-      etymology: 'Hebrew Yisra'el (God contends / prince with God).',
+      etymology: 'Hebrew Yisra\'el (God contends / prince with God).',
       sampleOccurrences: ['Genesis 32:28', '1 Nephi 19:10', 'Romans 9:6'],
     ),
 
