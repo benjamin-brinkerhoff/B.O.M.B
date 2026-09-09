@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../reader/presentation/reader_screen.dart';
+import '../../search/presentation/search_screen.dart';
+import '../../notes/presentation/notes_screen.dart';
 import '../../study/presentation/parallel_study_screen.dart';
-import '../../study_tools/presentation/study_tools_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 
-/// Adaptive navigation shell providing a BottomNavigationBar on compact mobile screens
-/// and a NavigationRail sidebar on wide desktop/tablet displays.
+/// Main application shell providing responsive navigation:
+/// - BottomNavigationBar for mobile screens (iOS & Android)
+/// - NavigationRail sidebar for wider desktop and tablet displays (Windows, macOS, Linux)
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -16,18 +18,23 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-  final List<Widget> _destinations = const [
-    ReaderScreen(),
-    ParallelStudyScreen(),
-    StudyToolsScreen(),
-    SettingsScreen(),
-  ];
+  void _navigateToReader() {
+    setState(() => _selectedIndex = 0);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final destinations = [
+      const ReaderScreen(),
+      SearchScreen(onNavigateToReader: _navigateToReader),
+      NotesScreen(onNavigateToReader: _navigateToReader),
+      const ParallelStudyScreen(),
+      const SettingsScreen(),
+    ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isWideScreen = constraints.maxWidth >= 720;
+        final bool isWideScreen = constraints.maxWidth >= 760;
 
         if (isWideScreen) {
           // Desktop & Tablet Navigation Rail Layout
@@ -44,12 +51,13 @@ class _MainShellState extends State<MainShell> {
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Column(
                       children: [
-                        Icon(Icons.menu_book, color: Theme.of(context).colorScheme.primary, size: 32),
+                        Icon(Icons.menu_book, color: Theme.of(context).colorScheme.primary, size: 30),
                         const SizedBox(height: 4),
                         Text(
                           'B.O.M.B',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            fontSize: 12,
                             color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
@@ -58,19 +66,24 @@ class _MainShellState extends State<MainShell> {
                   ),
                   destinations: const [
                     NavigationRailDestination(
-                      icon: Icon(Icons.book_outlined),
-                      selectedIcon: Icon(Icons.book),
-                      label: Text('Scriptures'),
+                      icon: Icon(Icons.auto_stories_outlined),
+                      selectedIcon: Icon(Icons.auto_stories),
+                      label: Text('Read'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.search_outlined),
+                      selectedIcon: Icon(Icons.search),
+                      label: Text('Search'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.bookmark_outline),
+                      selectedIcon: Icon(Icons.bookmark),
+                      label: Text('Notes'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.vertical_split_outlined),
                       selectedIcon: Icon(Icons.vertical_split),
-                      label: Text('Parallel Study'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.auto_stories_outlined),
-                      selectedIcon: Icon(Icons.auto_stories),
-                      label: Text('Tools'),
+                      label: Text('Parallel'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.settings_outlined),
@@ -80,14 +93,14 @@ class _MainShellState extends State<MainShell> {
                   ],
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
-                Expanded(child: _destinations[_selectedIndex]),
+                Expanded(child: destinations[_selectedIndex]),
               ],
             ),
           );
         } else {
           // Mobile Bottom Navigation Bar Layout (iOS & Android)
           return Scaffold(
-            body: _destinations[_selectedIndex],
+            body: destinations[_selectedIndex],
             bottomNavigationBar: NavigationBar(
               selectedIndex: _selectedIndex,
               onDestinationSelected: (index) {
@@ -95,19 +108,24 @@ class _MainShellState extends State<MainShell> {
               },
               destinations: const [
                 NavigationDestination(
-                  icon: Icon(Icons.book_outlined),
-                  selectedIcon: Icon(Icons.book),
-                  label: 'Scriptures',
+                  icon: Icon(Icons.auto_stories_outlined),
+                  selectedIcon: Icon(Icons.auto_stories),
+                  label: 'Read',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
+                  label: 'Search',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.bookmark_outline),
+                  selectedIcon: Icon(Icons.bookmark),
+                  label: 'Notes',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.vertical_split_outlined),
                   selectedIcon: Icon(Icons.vertical_split),
                   label: 'Parallel',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.auto_stories_outlined),
-                  selectedIcon: Icon(Icons.auto_stories),
-                  label: 'Tools',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.settings_outlined),

@@ -1,143 +1,249 @@
 import 'package:flutter/material.dart';
+import '../../../core/models/scripture_models.dart';
+import '../../../core/state/app_scope.dart';
+import '../../navigation/presentation/scripture_picker_dialog.dart';
+import 'verse_markup_sheet.dart';
 
-/// Primary scripture reader screen displaying volumes, books, and chapters.
-class ReaderScreen extends StatefulWidget {
+/// Full interactive scripture reader supporting highlighting, notes, dynamic typography,
+/// and instant hierarchical navigation.
+class ReaderScreen extends StatelessWidget {
   const ReaderScreen({super.key});
 
   @override
-  State<ReaderScreen> createState() => _ReaderScreenState();
-}
-
-class _ReaderScreenState extends State<ReaderScreen> {
-  String _selectedVolume = 'The Book of Mormon';
-  String _selectedBook = '1 Nephi';
-  int _selectedChapter = 1;
-
-  final List<String> _volumes = const [
-    'The Book of Mormon',
-    'The Old Testament',
-    'The New Testament',
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final state = AppScope.of(context);
     final theme = Theme.of(context);
+    final currentBook = state.currentBook;
+    final currentChapter = state.currentChapter;
+    final currentVolume = state.currentVolume;
+    final verses = state.currentVerses;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '\$_selectedBook \$_selectedChapter',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => ScripturePickerDialog.show(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '\${currentBook.title} \$currentChapter',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    Text(
+                      state.currentVolumeId == 'bom'
+                          ? 'The Book of Mormon'
+                          : '\${currentVolume.shortTitle} (\${state.currentBibleVersion.abbreviation})',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.keyboard_arrow_down, size: 20),
+              ],
+            ),
+          ),
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.library_books),
-            tooltip: 'Select Volume',
-            onSelected: (volume) {
-              setState(() {
-                _selectedVolume = volume;
-                _selectedBook = volume == 'The Book of Mormon' ? '1 Nephi' : 'Genesis';
-                _selectedChapter = 1;
-              });
-            },
-            itemBuilder: (context) => _volumes.map((v) {
-              return PopupMenuItem<String>(
-                value: v,
-                child: Text(v),
-              );
-            }).toList(),
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            tooltip: 'Previous Chapter',
+            onPressed: () => state.previousChapter(),
           ),
           IconButton(
-            icon: const Icon(Icons.format_size),
-            tooltip: 'Reading Size',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Font size adjustments are in Settings.')),
-              );
-            },
+            icon: const Icon(Icons.chevron_right),
+            tooltip: 'Next Chapter',
+            onPressed: () => state.nextChapter(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: 'Browse Scriptures',
+            onPressed: () => ScripturePickerDialog.show(context),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         children: [
-          // Volume Header Card
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.35),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _selectedVolume,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+          // Chapter Header Banner
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0, top: 8.0),
+              child: Column(
+                children: [
+                  Text(
+                    currentBook.title.toUpperCase(),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Chapter \$_selectedChapter',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Text(
+                    'CHAPTER \$currentChapter',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 60, child: Divider(thickness: 2)),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 24),
 
-          // Sample Verse Typography Block
-          _buildVerseItem(
-            verseNumber: 1,
-            text: 'I, Nephi, having been born of goodly parents, therefore I was taught somewhat in all the learning of my father; and having seen many afflictions in the course of my days, nevertheless, having been highly favored of the Lord in all my days...',
-            theme: theme,
+          // Scripture Verses
+          ...verses.map((verse) {
+            final annotation = state.getAnnotation(
+              verse.volumeId,
+              verse.bookId,
+              verse.chapter,
+              verse.verseNumber,
+            );
+            return _VerseRow(
+              verse: verse,
+              bookTitle: currentBook.title,
+              annotation: annotation,
+              readerStyle: state.getReaderTextStyle(context),
+              onTap: () => VerseMarkupSheet.show(context, verse, currentBook.title),
+            );
+          }),
+
+          const SizedBox(height: 32),
+
+          // Chapter Navigation Bottom Controls
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              OutlinedButton.icon(
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Previous'),
+                onPressed: () => state.previousChapter(),
+              ),
+              Text(
+                'Chapter \$currentChapter of \${currentBook.chapterCount}',
+                style: theme.textTheme.bodySmall,
+              ),
+              OutlinedButton.icon(
+                label: const Text('Next'),
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () => state.nextChapter(),
+              ),
+            ],
           ),
-          _buildVerseItem(
-            verseNumber: 2,
-            text: 'Yea, I make a record in the language of my father, which consists of the learning of the Jews and the language of the Egyptians.',
-            theme: theme,
-          ),
-          _buildVerseItem(
-            verseNumber: 3,
-            text: 'And I know that the record which I make is true; and I make it with mine own hand; and I make it according to my knowledge.',
-            theme: theme,
-          ),
+
+          const SizedBox(height: 40),
         ],
       ),
     );
   }
+}
 
-  Widget _buildVerseItem({required int verseNumber, required String text, required ThemeData theme}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 32,
-            child: Text(
-              '\$verseNumber',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-                fontSize: 14,
-              ),
+class _VerseRow extends StatelessWidget {
+  final ScriptureVerse verse;
+  final String bookTitle;
+  final VerseAnnotation? annotation;
+  final TextStyle readerStyle;
+  final VoidCallback onTap;
+
+  const _VerseRow({
+    required this.verse,
+    required this.bookTitle,
+    required this.annotation,
+    required this.readerStyle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasNote = annotation?.note != null && annotation!.note!.isNotEmpty;
+    final highlightColor = annotation?.highlightColor != null
+        ? annotation!.highlightColor!.color.withOpacity(0.55)
+        : null;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(6),
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+        decoration: BoxDecoration(
+          color: highlightColor,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Verse Number Pill
+                SizedBox(
+                  width: 34,
+                  child: Text(
+                    '\${verse.verseNumber}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+
+                // Verse Text
+                Expanded(
+                  child: Text(
+                    verse.text,
+                    style: readerStyle,
+                  ),
+                ),
+
+                // Note Indicator Icon
+                if (hasNote)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6.0),
+                    child: Icon(Icons.note_alt, size: 18, color: theme.colorScheme.secondary),
+                  ),
+              ],
             ),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                height: 1.6,
-                fontSize: 16,
+
+            // Inline Note Snippet if note is present
+            if (hasNote)
+              Padding(
+                padding: const EdgeInsets.only(left: 34.0, top: 6.0, bottom: 2.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border(left: BorderSide(color: theme.colorScheme.secondary, width: 3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          annotation!.note!,
+                          style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
